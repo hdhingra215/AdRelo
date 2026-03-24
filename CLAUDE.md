@@ -27,9 +27,13 @@ AdRelo – The Agency Engine. A SaaS product built with Next.js 14 (App Router),
 - `server.ts` — Server client (`createServerClient` with cookies) for Server Components, Server Actions, Route Handlers
 - `middleware.ts` — Middleware client for session refresh; used by `src/middleware.ts`
 
-**Auth flow:** Middleware refreshes the session token on every request. Protected pages (e.g., dashboard) check `supabase.auth.getUser()` server-side and redirect to `/login` if unauthenticated.
+**Server Actions:** Auth actions (login, signup, logout) are in `src/app/(auth)/actions.ts`. These use the server Supabase client and `redirect()` for navigation.
+
+**Auth flow:** Middleware refreshes the session token on every request (except static assets, images, favicon). Protected pages (e.g., dashboard) check `supabase.auth.getUser()` server-side and redirect to `/login` if unauthenticated. OAuth/magic-link callbacks are handled by `src/app/auth/callback/route.ts`.
 
 **Path alias:** `@/*` maps to `./src/*`.
+
+**No test framework configured.** There are no tests or test runners set up yet.
 
 **Database types:** `src/types/database.ts` — regenerate from Supabase schema with `npx supabase gen types typescript --project-id <id>`.
 

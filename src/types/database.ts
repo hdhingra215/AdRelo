@@ -1,12 +1,91 @@
 // Generate this file from your Supabase schema using:
 // npx supabase gen types typescript --project-id your-project-id > src/types/database.ts
 //
-// For now, this is a placeholder. Replace with generated types once your
-// Supabase schema is set up.
+// Below are manual types matching the migration in supabase/migrations/.
 
 export type Database = {
   public: {
-    Tables: Record<string, never>;
+    Tables: {
+      clients: {
+        Row: {
+          id: string;
+          name: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          created_at?: string;
+        };
+      };
+      release_orders: {
+        Row: {
+          id: string;
+          ro_number: string;
+          date: string;
+          client_id: string;
+          publication: string;
+          edition: string;
+          advertisement_category: string;
+          caption: string;
+          size: string;
+          rate: number;
+          card_rate: number;
+          discount: number;
+          net_amount: number;
+          gst: number;
+          total_amount: number;
+          publishing_date: string;
+          special_comment: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          ro_number: string;
+          date: string;
+          client_id: string;
+          publication: string;
+          edition: string;
+          advertisement_category: string;
+          caption: string;
+          size: string;
+          rate: number;
+          card_rate: number;
+          discount: number;
+          net_amount: number;
+          gst: number;
+          total_amount: number;
+          publishing_date: string;
+          special_comment?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          ro_number?: string;
+          date?: string;
+          client_id?: string;
+          publication?: string;
+          edition?: string;
+          advertisement_category?: string;
+          caption?: string;
+          size?: string;
+          rate?: number;
+          card_rate?: number;
+          discount?: number;
+          net_amount?: number;
+          gst?: number;
+          total_amount?: number;
+          publishing_date?: string;
+          special_comment?: string;
+          created_at?: string;
+        };
+      };
+    };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: Record<string, never>;
