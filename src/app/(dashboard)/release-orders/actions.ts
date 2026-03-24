@@ -105,5 +105,5 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
     return { error: "Failed to create release order: " + roError.message };
   }
 
-  redirect("/dashboard");
+  redirect("/release-orders");
 }
