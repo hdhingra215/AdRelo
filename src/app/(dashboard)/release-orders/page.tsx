@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { SoftButton } from "@/components/ui/soft-button";
 
 export default async function ReleaseOrdersPage() {
   const supabase = createClient();
@@ -19,93 +20,114 @@ export default async function ReleaseOrdersPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <h1 className="text-xl font-bold tracking-tight">Release Orders</h1>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/dashboard"
-              className="text-sm text-gray-500 hover:text-gray-800"
-            >
-              &larr; Dashboard
-            </Link>
-            <Link
-              href="/release-orders/new"
-              className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              New Release Order
-            </Link>
-          </div>
+    <div className="min-h-screen">
+      {/* Nav */}
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
+        <div className="flex items-center gap-2.5">
+          <Link href="/dashboard" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black text-white text-xs font-bold">
+              A
+            </div>
+            <span className="text-sm font-semibold text-foreground">
+              AdRelo
+            </span>
+          </Link>
+          <span className="text-foreground/15 mx-1">/</span>
+          <span className="text-sm text-muted">Release Orders</span>
         </div>
-      </header>
+        <SoftButton href="/release-orders/new" size="sm">
+          + New Order
+        </SoftButton>
+      </nav>
 
-      <main className="mx-auto max-w-7xl px-6 py-10">
+      {/* Heading */}
+      <div className="fade-in-up mx-auto max-w-6xl px-6 pt-16 pb-4">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+          All orders
+        </h1>
+        <p className="mt-2 text-base text-muted">
+          Browse and manage your release orders
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-6xl px-6 pb-24 pt-8">
         {error ? (
-          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <div className="fade-in rounded-xl bg-white/80 px-5 py-4 text-sm text-red-600 shadow-soft">
             Failed to load release orders: {error.message}
           </div>
         ) : !orders || orders.length === 0 ? (
-          <div className="rounded-md border border-gray-200 bg-white px-6 py-12 text-center">
-            <p className="text-gray-500">No release orders yet.</p>
-            <Link
-              href="/release-orders/new"
-              className="mt-4 inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Create your first Release Order
-            </Link>
+          <div className="fade-in-up rounded-2xl bg-white/80 backdrop-blur-xl shadow-card px-8 py-24 text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-foreground/[0.04]">
+              <svg className="h-6 w-6 text-foreground/25" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+              </svg>
+            </div>
+            <p className="text-lg font-medium text-foreground/40">
+              No release orders yet
+            </p>
+            <p className="mx-auto mt-1.5 max-w-sm text-sm text-muted">
+              Create your first order to get started
+            </p>
+            <div className="mt-8">
+              <SoftButton href="/release-orders/new" size="lg">
+                Create your first order
+              </SoftButton>
+            </div>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+          <div className="fade-in-up overflow-hidden rounded-2xl bg-white/80 backdrop-blur-xl shadow-card">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-black/[0.04]">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted">
                     RO Number
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Client Name
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted">
+                    Client
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted">
                     Publication
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
-                    Total Amount
+                  <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                    Total
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {orders.map((order) => {
                   const clientName =
                     order.clients &&
                     typeof order.clients === "object" &&
                     !Array.isArray(order.clients)
                       ? (order.clients as { name: string }).name
-                      : "—";
+                      : "\u2014";
 
                   return (
-                    <tr key={order.id} className="hover:bg-gray-50">
+                    <tr
+                      key={order.id}
+                      className="border-b border-black/[0.03] transition-colors duration-150 hover:bg-black/[0.015]"
+                    >
                       <td className="whitespace-nowrap px-6 py-4">
                         <Link
                           href={`/release-orders/${order.id}`}
-                          className="font-medium text-blue-600 hover:text-blue-800"
+                          className="font-medium text-foreground hover:text-accent transition-colors"
                         >
                           {order.ro_number}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted">
                         {clientName}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted">
                         {order.publication}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-700">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-muted">
                         {order.date}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-right text-sm font-medium text-gray-900">
+                      <td className="whitespace-nowrap px-6 py-4 text-right tabular-nums text-sm font-semibold text-foreground">
                         {Number(order.total_amount).toFixed(2)}
                       </td>
                     </tr>
@@ -115,7 +137,7 @@ export default async function ReleaseOrdersPage() {
             </table>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 }
