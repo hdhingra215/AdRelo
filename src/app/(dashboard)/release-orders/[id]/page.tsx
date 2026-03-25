@@ -48,13 +48,14 @@ export default async function ReleaseOrderDetailPage({
             >
               &larr; All Release Orders
             </Link>
-            <button
-              disabled
-              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 opacity-60 cursor-not-allowed"
-              title="Coming soon"
+            <a
+              href={`/release-orders/${params.id}/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Download PDF
-            </button>
+            </a>
           </div>
         </div>
       </header>
