@@ -59,17 +59,34 @@ export default async function ReleaseOrderDetailPage({
             {order.ro_number}
           </span>
         </div>
-        <a
-          href={`/release-orders/${params.id}/pdf`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-xl bg-white/60 backdrop-blur border border-black/[0.06] px-4 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-white hover:text-foreground hover:shadow-soft"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-          </svg>
-          PDF
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href={`/release-orders/${params.id}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl bg-white/60 backdrop-blur border border-black/[0.06] px-4 py-2 text-sm font-medium text-muted transition-all duration-200 hover:bg-white hover:text-foreground hover:shadow-soft"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            PDF
+          </a>
+          {order.bill_generated ? (
+            <span className="inline-flex items-center gap-1.5 rounded-xl bg-black/[0.03] px-4 py-2 text-sm font-medium text-muted">
+              <svg className="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+              Billed
+            </span>
+          ) : (
+            <Link
+              href={`/bills/new?ro_id=${params.id}`}
+              className="inline-flex items-center gap-2 rounded-xl bg-black px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:bg-black/90"
+            >
+              Generate Bill
+            </Link>
+          )}
+        </div>
       </nav>
 
       {/* Heading */}

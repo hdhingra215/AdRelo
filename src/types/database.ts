@@ -1,7 +1,7 @@
 // Generate this file from your Supabase schema using:
 // npx supabase gen types typescript --project-id your-project-id > src/types/database.ts
 //
-// Below are manual types matching the migration in supabase/migrations/.
+// Below are manual types matching the migrations in supabase/migrations/.
 
 export type Database = {
   public: {
@@ -42,6 +42,7 @@ export type Database = {
           total_amount: number;
           publishing_date: string;
           special_comment: string;
+          bill_generated: boolean;
           created_at: string;
         };
         Insert: {
@@ -62,6 +63,7 @@ export type Database = {
           total_amount: number;
           publishing_date: string;
           special_comment?: string;
+          bill_generated?: boolean;
           created_at?: string;
         };
         Update: {
@@ -82,6 +84,51 @@ export type Database = {
           total_amount?: number;
           publishing_date?: string;
           special_comment?: string;
+          bill_generated?: boolean;
+          created_at?: string;
+        };
+      };
+      bills: {
+        Row: {
+          id: string;
+          bill_number: string;
+          date: string;
+          release_order_id: string;
+          client_id: string;
+          amount: number;
+          discount: number;
+          net_amount: number;
+          gst: number;
+          total_amount: number;
+          amount_in_words: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          bill_number: string;
+          date: string;
+          release_order_id: string;
+          client_id: string;
+          amount: number;
+          discount: number;
+          net_amount: number;
+          gst: number;
+          total_amount: number;
+          amount_in_words: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          bill_number?: string;
+          date?: string;
+          release_order_id?: string;
+          client_id?: string;
+          amount?: number;
+          discount?: number;
+          net_amount?: number;
+          gst?: number;
+          total_amount?: number;
+          amount_in_words?: string;
           created_at?: string;
         };
       };
