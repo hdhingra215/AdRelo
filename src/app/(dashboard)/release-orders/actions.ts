@@ -48,10 +48,10 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
   }
 
   const rate = Number(input.rate) || 0;
-  const discount = Number(input.discount) || 0;
+  const discountAmount = Number(input.discount) || 0; // flat discount amount from client
   const cardRate = Number(input.card_rate) || 0;
 
-  const net_amount = Math.max(rate - discount, 0);
+  const net_amount = Math.max(rate - discountAmount, 0);
   const gst = parseFloat((net_amount * GST_RATE).toFixed(2));
   const total_amount = parseFloat((net_amount + gst).toFixed(2));
 
@@ -93,7 +93,7 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
     size: input.size.trim(),
     rate,
     card_rate: cardRate,
-    discount,
+    discount: discountAmount,
     net_amount,
     gst,
     total_amount,

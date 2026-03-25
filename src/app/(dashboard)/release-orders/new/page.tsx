@@ -134,7 +134,7 @@ export default function NewReleaseOrderPage() {
 
   // ── Rate calculation ──
   const cardRate = Number(form.card_rate) || 0;
-  const discount = Number(form.discount) || 0;
+  const discountPct = Math.min(Math.max(Number(form.discount) || 0, 0), 100);
   const sizeW = parseSize(form.size)?.w ?? 0;
   const sizeH = parseSize(form.size)?.h ?? 0;
   const sizeParsed = sizeW > 0 && sizeH > 0 ? { w: sizeW, h: sizeH } : null;
@@ -147,11 +147,12 @@ export default function NewReleaseOrderPage() {
   }, [sizeW, sizeH, cardRate]);
 
   const calculated = useMemo(() => {
-    const net_amount = Math.max(rate - discount, 0);
+    const discount_amount = parseFloat((rate * (discountPct / 100)).toFixed(2));
+    const net_amount = Math.max(rate - discount_amount, 0);
     const gst = parseFloat((net_amount * GST_RATE).toFixed(2));
     const total_amount = parseFloat((net_amount + gst).toFixed(2));
-    return { rate, net_amount, gst, total_amount };
-  }, [rate, discount]);
+    return { rate, discount_amount, net_amount, gst, total_amount };
+  }, [rate, discountPct]);
 
   // Edition options based on selected publication
   const editionOptions = EDITION_MAP[form.publication] ?? DEFAULT_EDITIONS;
@@ -180,7 +181,7 @@ export default function NewReleaseOrderPage() {
         size: form.size,
         rate: calculated.rate,
         card_rate: cardRate,
-        discount,
+        discount: calculated.discount_amount,
         publishing_date: form.publishing_date,
         special_comment: specialComment,
       });
@@ -339,16 +340,25 @@ export default function NewReleaseOrderPage() {
                 placeholder="e.g. 580"
                 required
               />
-              <SoftInput
-                label="Discount"
-                type="number"
-                value={form.discount}
-                onChange={(v) => update("discount", v)}
-                min="0"
-                step="0.01"
-                placeholder="Flat discount amount"
-                required
-              />
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted">
+                  Discount (%)<span className="text-foreground/30 ml-0.5">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={form.discount}
+                    onChange={(e) => update("discount", e.target.value)}
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    placeholder="e.g. 15"
+                    required
+                    className="w-full rounded-lg border border-black/[0.06] bg-white/60 px-3.5 py-2.5 pr-10 text-sm text-foreground placeholder:text-foreground/25 focus:bg-white focus:border-foreground/20 focus:outline-none focus:ring-1 focus:ring-foreground/10 transition-all duration-200"
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">%</span>
+                </div>
+              </div>
             </div>
 
             {/* Auto-calculated rate display */}
@@ -365,12 +375,20 @@ export default function NewReleaseOrderPage() {
             )}
 
             {/* Calculation summary */}
-            <div className="mt-5 rounded-xl bg-black/[0.02] border border-black/[0.04] p-5">
-              <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="mt-5 rounded-xl bg-black/[0.02] border border-black/[0.04] p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                 <div>
                   <span className="text-xs font-medium text-muted">Rate</span>
                   <p className="mt-1 text-lg font-semibold tabular-nums text-foreground">
                     {calculated.rate.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-xs font-medium text-muted">
+                    Discount ({discountPct}%)
+                  </span>
+                  <p className="mt-1 text-lg font-semibold tabular-nums text-red-600/70">
+                    &minus; {calculated.discount_amount.toFixed(2)}
                   </p>
                 </div>
                 <div>
@@ -381,6 +399,9 @@ export default function NewReleaseOrderPage() {
                     {calculated.net_amount.toFixed(2)}
                   </p>
                 </div>
+              </div>
+              <hr className="border-black/[0.04]" />
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <span className="text-xs font-medium text-muted">
                     GST (5%)
