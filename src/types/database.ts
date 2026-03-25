@@ -132,6 +132,43 @@ export type Database = {
           created_at?: string;
         };
       };
+      agency_settings: {
+        Row: {
+          id: string;
+          user_id: string;
+          firm_name: string;
+          gst_number: string;
+          bank_account: string;
+          ifsc: string;
+          branch: string;
+          upi_id: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          firm_name?: string;
+          gst_number?: string;
+          bank_account?: string;
+          ifsc?: string;
+          branch?: string;
+          upi_id?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          firm_name?: string;
+          gst_number?: string;
+          bank_account?: string;
+          ifsc?: string;
+          branch?: string;
+          upi_id?: string;
+          updated_at?: string;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
