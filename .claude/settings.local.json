@@ -5,7 +5,8 @@
       "Bash(mv /Users/saikripa/Desktop/adrelo-temp/* /Users/saikripa/Desktop/adrelo-temp/.* /Users/saikripa/Desktop/AdRelo/)",
       "Bash(rm -rf /Users/saikripa/Desktop/adrelo-temp)",
       "Bash(npm install:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ls:*)"
     ]
   }
 }
