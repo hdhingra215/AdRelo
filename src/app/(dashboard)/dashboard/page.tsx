@@ -26,8 +26,8 @@ export default async function DashboardPage() {
     ? `${now.getFullYear() + 1}-01-01`
     : `${now.getFullYear()}-${String(now.getMonth() + 2).padStart(2, "0")}-01`;
 
-  // Fetch all stats in parallel
-  const [roCount, billCount, revenueResult] = await Promise.all([
+  // Fetch all stats + recent ROs in parallel
+  const [roCount, billCount, revenueResult, recentROsResult] = await Promise.all([
     supabase.from("release_orders").select("*", { count: "exact", head: true }),
     supabase.from("bills").select("*", { count: "exact", head: true }),
     supabase
@@ -35,6 +35,11 @@ export default async function DashboardPage() {
       .select("total_amount")
       .gte("date", monthStart)
       .lt("date", nextMonth),
+    supabase
+      .from("release_orders")
+      .select("id, ro_number, total_amount, created_at, clients(name)")
+      .order("created_at", { ascending: false })
+      .limit(5),
   ]);
 
   const totalROs = roCount.count ?? 0;
@@ -43,6 +48,7 @@ export default async function DashboardPage() {
     (sum, row) => sum + Number(row.total_amount ?? 0),
     0
   );
+  const recentROs = recentROsResult.data ?? [];
 
   return (
     <div className="min-h-screen">
@@ -83,7 +89,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* Stat cards */}
-      <section className="mx-auto max-w-5xl px-6 pt-10 pb-32">
+      <section className="mx-auto max-w-5xl px-6 pt-10">
         <div className="grid gap-5 sm:grid-cols-3 stagger">
           <Link href="/release-orders">
             <SoftCard className="transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
@@ -116,6 +122,75 @@ export default async function DashboardPage() {
             </p>
           </SoftCard>
         </div>
+      </section>
+
+      {/* Recent Release Orders */}
+      <section className="mx-auto max-w-5xl px-6 pt-10 pb-32">
+        <SoftCard title="Recent Release Orders">
+          {recentROs.length === 0 ? (
+            <p className="text-sm text-muted">No recent release orders</p>
+          ) : (
+            <div className="-mx-6 -mb-6 overflow-hidden rounded-b-2xl">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-black/[0.04]">
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">
+                      RO Number
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted">
+                      Client
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                      Amount
+                    </th>
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted">
+                      Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentROs.map((ro) => {
+                    const clientName =
+                      ro.clients &&
+                      typeof ro.clients === "object" &&
+                      !Array.isArray(ro.clients)
+                        ? (ro.clients as { name: string }).name
+                        : "\u2014";
+
+                    return (
+                      <tr
+                        key={ro.id}
+                        className="border-b border-black/[0.03] last:border-0 transition-colors hover:bg-black/[0.015]"
+                      >
+                        <td className="whitespace-nowrap px-6 py-4">
+                          <Link
+                            href={`/release-orders/${ro.id}`}
+                            className="text-sm font-medium text-accent hover:underline"
+                          >
+                            {ro.ro_number}
+                          </Link>
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-sm text-muted">
+                          {clientName}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-right tabular-nums text-sm font-semibold text-foreground">
+                          {formatCurrency(Number(ro.total_amount ?? 0))}
+                        </td>
+                        <td className="whitespace-nowrap px-6 py-4 text-right text-sm text-muted">
+                          {new Date(ro.created_at).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </SoftCard>
       </section>
     </div>
   );
