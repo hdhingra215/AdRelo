@@ -2,7 +2,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SoftButton } from "@/components/ui/soft-button";
+import { SoftCard } from "@/components/ui/soft-card";
 import { UserMenu } from "@/components/ui/user-menu";
+
+function formatCurrency(amount: number): string {
+  return `₹${amount.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -13,6 +18,31 @@ export default async function DashboardPage() {
   if (!user) {
     redirect("/login");
   }
+
+  // Current month boundaries (YYYY-MM-DD)
+  const now = new Date();
+  const monthStart = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const nextMonth = now.getMonth() === 11
+    ? `${now.getFullYear() + 1}-01-01`
+    : `${now.getFullYear()}-${String(now.getMonth() + 2).padStart(2, "0")}-01`;
+
+  // Fetch all stats in parallel
+  const [roCount, billCount, revenueResult] = await Promise.all([
+    supabase.from("release_orders").select("*", { count: "exact", head: true }),
+    supabase.from("bills").select("*", { count: "exact", head: true }),
+    supabase
+      .from("bills")
+      .select("total_amount")
+      .gte("date", monthStart)
+      .lt("date", nextMonth),
+  ]);
+
+  const totalROs = roCount.count ?? 0;
+  const totalBills = billCount.count ?? 0;
+  const monthlyRevenue = (revenueResult.data ?? []).reduce(
+    (sum, row) => sum + Number(row.total_amount ?? 0),
+    0
+  );
 
   return (
     <div className="min-h-screen">
@@ -52,45 +82,39 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Floating preview cards */}
+      {/* Stat cards */}
       <section className="mx-auto max-w-5xl px-6 pt-10 pb-32">
         <div className="grid gap-5 sm:grid-cols-3 stagger">
-          {/* Card 1 — summary */}
-          <div className="rounded-2xl bg-white/80 backdrop-blur-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/[0.04]">
-              <svg className="h-5 w-5 text-foreground/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-              </svg>
-            </div>
-            <Link href="/release-orders" className="block">
-              <h3 className="text-sm font-semibold text-foreground">Release Orders</h3>
-              <p className="mt-1 text-sm text-muted">View and manage all orders</p>
-            </Link>
-          </div>
+          <Link href="/release-orders">
+            <SoftCard className="transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Release Orders
+              </p>
+              <p className="mt-2 text-4xl font-bold tracking-tight text-foreground">
+                {totalROs}
+              </p>
+            </SoftCard>
+          </Link>
 
-          {/* Card 2 — create */}
-          <div className="rounded-2xl bg-white/80 backdrop-blur-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/[0.04]">
-              <svg className="h-5 w-5 text-foreground/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-            </div>
-            <Link href="/release-orders/new" className="block">
-              <h3 className="text-sm font-semibold text-foreground">Create New</h3>
-              <p className="mt-1 text-sm text-muted">Draft a new release order</p>
-            </Link>
-          </div>
+          <Link href="/bills">
+            <SoftCard className="transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                Bills Generated
+              </p>
+              <p className="mt-2 text-4xl font-bold tracking-tight text-foreground">
+                {totalBills}
+              </p>
+            </SoftCard>
+          </Link>
 
-          {/* Card 3 — coming soon */}
-          <div className="rounded-2xl bg-white/50 backdrop-blur shadow-soft border border-dashed border-black/[0.06] p-6">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-foreground/[0.03]">
-              <svg className="h-5 w-5 text-foreground/20" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-              </svg>
-            </div>
-            <h3 className="text-sm font-semibold text-foreground/25">Analytics</h3>
-            <p className="mt-1 text-sm text-muted/50">Coming soon</p>
-          </div>
+          <SoftCard className="transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+              This Month Revenue
+            </p>
+            <p className="mt-2 text-4xl font-bold tracking-tight text-foreground">
+              {formatCurrency(monthlyRevenue)}
+            </p>
+          </SoftCard>
         </div>
       </section>
     </div>
