@@ -274,16 +274,14 @@ const steps = [
 ];
 
 /* ────────────────────────────────────────────────────
-   Connector: full-width S-curve between step rows.
+   Connector: glowing ribbon that fades into cards.
 
-   Key design decisions:
-   - viewBox 700x160, rendered at full container width
-   - Negative margin -my-12 deeply overlaps into adjacent rows
-     so endpoints visually touch card edges
-   - z-[1] sits above background, below gradient containers (z-10)
-     and below inner cards (z-20)
-   - Single-tone violet/gray gradient for clarity
-   - strokeWidth 1.5, opacity 0.16 for subtle visibility
+   3-layer glow (outer / mid / core) with a stroke
+   gradient whose first and last stops fade to
+   transparent so the ribbon dissolves before
+   reaching the card edge — no hard intersection.
+
+   z-0 ensures it always renders below cards (z-10/20).
    ──────────────────────────────────────────────────── */
 function Connector({
   direction,
@@ -294,21 +292,21 @@ function Connector({
 }) {
   const { ref, offset } = useParallax(0.01);
 
-  /* Card centers in the 2-col grid:
-     Right col center ≈ 540 (77%), Left col center ≈ 160 (23%)
-     The path uses two smooth cubic beziers forming an S-shape */
+  /* Path shortened: starts at y=15 and ends at y=145
+     (was 0→160) so endpoints sit ~10px inside the
+     overlap zone instead of touching card edges. */
   const path =
     direction === "right-to-left"
-      ? "M540 0 C540 50, 400 60, 350 80 C300 100, 160 110, 160 160"
-      : "M160 0 C160 50, 300 60, 350 80 C400 100, 540 110, 540 160";
+      ? "M538 15 C538 55, 400 65, 350 80 C300 95, 162 105, 162 145"
+      : "M162 15 C162 55, 300 65, 350 80 C400 95, 538 105, 538 145";
 
-  const startX = direction === "right-to-left" ? 540 : 160;
-  const endX = direction === "right-to-left" ? 160 : 540;
+  const startX = direction === "right-to-left" ? 538 : 162;
+  const endX = direction === "right-to-left" ? 162 : 538;
 
   return (
     <div
       ref={ref}
-      className="hidden lg:block relative z-[1] pointer-events-none -my-12"
+      className="hidden lg:block relative z-0 pointer-events-none -my-12"
       aria-hidden="true"
       style={{
         transform: `translateY(${offset}px)`,
@@ -322,30 +320,66 @@ function Connector({
         className="w-full h-[120px]"
       >
         <defs>
+          {/* Stroke gradient with fade-out at both ends.
+              Flows along the curve via userSpaceOnUse. */}
           <linearGradient
             id={`conn-${id}`}
-            x1="0%"
-            y1="0%"
-            x2="0%"
-            y2="100%"
+            gradientUnits="userSpaceOnUse"
+            x1={String(startX)}
+            y1="15"
+            x2={String(endX)}
+            y2="145"
           >
-            <stop offset="0%" stopColor="#8b7fc7" stopOpacity="0.16" />
-            <stop offset="100%" stopColor="#9ca3af" stopOpacity="0.10" />
+            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0" />
+            <stop offset="12%" stopColor="#8b5cf6" stopOpacity="1" />
+            <stop offset="40%" stopColor="#7dd3fc" stopOpacity="1" />
+            <stop offset="88%" stopColor="#fbbf24" stopOpacity="1" />
+            <stop offset="100%" stopColor="#fbbf24" stopOpacity="0" />
           </linearGradient>
+
+          {/* Blur filters */}
+          <filter id={`blur-outer-${id}`} x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="6" />
+          </filter>
+          <filter id={`blur-mid-${id}`} x="-15%" y="-15%" width="130%" height="130%">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
         </defs>
 
-        {/* S-curve */}
+        {/* Layer 3: outer atmospheric glow */}
         <path
           d={path}
           stroke={`url(#conn-${id})`}
-          strokeWidth="1.5"
+          strokeWidth="14"
           strokeLinecap="round"
+          strokeLinejoin="round"
           fill="none"
+          opacity="0.06"
+          filter={`url(#blur-outer-${id})`}
         />
 
-        {/* Endpoint dots */}
-        <circle cx={startX} cy="2" r="2.5" fill="#8b7fc7" fillOpacity="0.18" />
-        <circle cx={endX} cy="158" r="2.5" fill="#9ca3af" fillOpacity="0.14" />
+        {/* Layer 2: mid glow body */}
+        <path
+          d={path}
+          stroke={`url(#conn-${id})`}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity="0.12"
+          filter={`url(#blur-mid-${id})`}
+        />
+
+        {/* Layer 1: crisp core */}
+        <path
+          d={path}
+          stroke={`url(#conn-${id})`}
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity="0.22"
+        />
       </svg>
     </div>
   );
