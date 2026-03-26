@@ -61,9 +61,10 @@ const plans = [
       "GST reports & exports",
     ],
     cta: "Start Pro Trial",
-    href: "/signup",
+    href: "/upgrade",
     highlighted: true,
     badge: "Most Popular",
+    socialProof: "Most agencies choose this",
   },
   {
     name: "Business",
@@ -186,6 +187,11 @@ export function PricingSection() {
                   >
                     {plan.cta}
                   </SoftButton>
+                )}
+                {plan.socialProof && (
+                  <p className="mt-2.5 text-center text-[11px] text-muted">
+                    {plan.socialProof}
+                  </p>
                 )}
               </div>
             </div>

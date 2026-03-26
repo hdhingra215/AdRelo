@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getUserUsage } from "@/lib/usage";
 
 const GST_RATE = 0.05;
 
@@ -30,6 +31,15 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
 
   if (!user) {
     return { error: "You must be logged in." };
+  }
+
+  // ── Plan limit enforcement ──
+  const usage = await getUserUsage(supabase, user.id);
+  if (!usage.canCreateRO) {
+    return {
+      error: `You've reached your ${usage.roLimit} RO limit for this month. Upgrade to Pro to continue creating Release Orders.`,
+      limitReached: true,
+    };
   }
 
   // Validate required fields

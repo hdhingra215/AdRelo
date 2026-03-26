@@ -151,6 +151,7 @@ export type Database = {
           ifsc: string;
           branch: string;
           upi_id: string;
+          plan: string;
           created_at: string;
           updated_at: string;
         };
@@ -163,6 +164,7 @@ export type Database = {
           ifsc?: string;
           branch?: string;
           upi_id?: string;
+          plan?: string;
           created_at?: string;
           updated_at?: string;
         };
@@ -175,6 +177,7 @@ export type Database = {
           ifsc?: string;
           branch?: string;
           upi_id?: string;
+          plan?: string;
           updated_at?: string;
         };
       };

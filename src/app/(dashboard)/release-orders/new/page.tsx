@@ -119,6 +119,7 @@ export default function NewReleaseOrderPage() {
   });
 
   const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function update(field: string, value: string) {
@@ -188,6 +189,7 @@ export default function NewReleaseOrderPage() {
 
       if (result?.error) {
         setError(result.error);
+        setLimitReached(!!result.limitReached);
       }
     } catch {
       // redirect() throws NEXT_REDIRECT — expected on success
@@ -229,8 +231,16 @@ export default function NewReleaseOrderPage() {
 
       <div className="mx-auto max-w-3xl px-6 pb-24 pt-8">
         {error && (
-          <div className="mb-6 rounded-xl bg-white/80 px-5 py-4 text-sm text-red-600 shadow-soft fade-in">
-            {error}
+          <div className="mb-6 rounded-xl bg-white/80 px-5 py-4 shadow-soft fade-in">
+            <p className="text-sm text-red-600">{error}</p>
+            {limitReached && (
+              <div className="mt-3 flex items-center gap-3">
+                <SoftButton href="/upgrade" size="sm">
+                  Upgrade to Pro
+                </SoftButton>
+                <span className="text-xs text-muted">Resets on 1st of next month</span>
+              </div>
+            )}
           </div>
         )}
 
