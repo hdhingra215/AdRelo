@@ -31,6 +31,8 @@ const config: Config = {
         "gradient-wave": "gradient-wave 10s ease infinite",
         "fade-in": "fadeIn 600ms cubic-bezier(0.22,1,0.36,1) both",
         "fade-in-up": "fadeInUp 700ms cubic-bezier(0.22,1,0.36,1) both",
+        "marquee-left": "marquee-left 65s linear infinite",
+        "marquee-right": "marquee-right 65s linear infinite",
       },
       keyframes: {
         "gradient-wave": {
@@ -44,6 +46,14 @@ const config: Config = {
         fadeInUp: {
           from: { opacity: "0", transform: "translateY(16px)" },
           to: { opacity: "1", transform: "translateY(0)" },
+        },
+        "marquee-left": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "marquee-right": {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0)" },
         },
       },
     },

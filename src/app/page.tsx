@@ -1,4 +1,7 @@
 import { SoftButton } from "@/components/ui/soft-button";
+import { MarqueeCards } from "@/components/ui/marquee-cards";
+import { HowItWorks } from "@/components/ui/how-it-works";
+import { PricingSection } from "@/components/ui/pricing-section";
 
 export default function Home() {
   return (
@@ -22,17 +25,17 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ── */}
-      <section className="fade-in-up mx-auto max-w-[700px] px-6 pt-24 pb-12 text-center">
-        <div className="mb-5 inline-flex items-center gap-2 rounded-full bg-white/60 backdrop-blur border border-black/[0.06] px-3.5 py-1 text-xs font-medium text-muted">
+      <section className="fade-in-up mx-auto max-w-[720px] px-6 pt-32 pb-16 text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/60 backdrop-blur border border-black/[0.06] px-3.5 py-1 text-xs font-medium text-muted">
           <span className="h-1.5 w-1.5 rounded-full bg-black" />
           The Agency Engine
         </div>
-        <h1 className="text-5xl font-semibold leading-[1.08] tracking-tight text-foreground sm:text-7xl">
+        <h1 className="text-5xl font-semibold leading-[1.06] tracking-tight text-foreground sm:text-7xl">
           Run your agency
           <br />
-          like a machine
+          <span className="text-foreground/40">like a machine</span>
         </h1>
-        <p className="mx-auto mt-8 max-w-xl text-base leading-relaxed text-muted">
+        <p className="mx-auto mt-8 max-w-xl text-[16px] leading-relaxed text-muted">
           Create release orders, manage clients, generate professional PDFs, and
           keep your entire advertising workflow organized — in one clean tool.
         </p>
@@ -46,8 +49,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Marquee ── */}
+      <section className="pt-6 pb-10">
+        <MarqueeCards />
+      </section>
+
+      {/* ── How it works ── */}
+      <HowItWorks />
+
       {/* ── Feature cards ── */}
-      <section className="mx-auto max-w-5xl px-6 pt-16 pb-24">
+      <section className="mx-auto max-w-5xl px-6 pt-24 pb-12">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl leading-[1.1]">
+            Everything you need,
+            <br />
+            <span className="text-foreground/40">nothing you don&apos;t</span>
+          </h2>
+        </div>
         <div className="grid gap-7 sm:grid-cols-3 stagger">
           <div className="sm:mt-0">
             <FeatureCard
@@ -92,38 +110,10 @@ export default function Home() {
       </section>
 
       {/* ── Pricing ── */}
-      <section className="mx-auto max-w-3xl px-6 pt-8 pb-24 text-center">
-        <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Simple pricing
-        </h2>
-        <p className="mx-auto mt-3 max-w-md text-base text-muted">
-          One plan, everything included. No hidden fees.
-        </p>
-
-        <div className="mx-auto mt-12 max-w-sm rounded-2xl bg-white/80 backdrop-blur-xl shadow-card-lg p-8 text-left">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
-            Starter
-          </p>
-          <div className="mt-3 flex items-baseline gap-1">
-            <span className="text-4xl font-bold text-foreground">Free</span>
-            <span className="text-sm text-muted">during beta</span>
-          </div>
-          <ul className="mt-6 space-y-3 text-sm text-foreground/70">
-            <PricingItem>Unlimited release orders</PricingItem>
-            <PricingItem>Client management</PricingItem>
-            <PricingItem>PDF downloads</PricingItem>
-            <PricingItem>Secure authentication</PricingItem>
-          </ul>
-          <div className="mt-8">
-            <SoftButton href="/signup" fullWidth size="lg">
-              Get Started
-            </SoftButton>
-          </div>
-        </div>
-      </section>
+      <PricingSection />
 
       {/* ── Footer ── */}
-      <footer className="border-t border-black/[0.04] py-10">
+      <footer className="border-t border-black/[0.03] py-12">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 sm:flex-row">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-md bg-black text-white text-[10px] font-bold">
@@ -152,8 +142,8 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl bg-white/80 backdrop-blur-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1">
-      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04]">
+    <div className="group rounded-2xl bg-white/75 backdrop-blur-xl shadow-card p-6 transition-all duration-300 hover:shadow-card-lg hover:-translate-y-1 hover:bg-white/85">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-black/[0.04] transition-colors duration-300 group-hover:bg-black/[0.06]">
         <svg
           className="h-5 w-5 text-foreground/40"
           fill="none"
@@ -167,26 +157,5 @@ function FeatureCard({
       <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       <p className="mt-1.5 text-sm leading-relaxed text-muted">{description}</p>
     </div>
-  );
-}
-
-function PricingItem({ children }: { children: React.ReactNode }) {
-  return (
-    <li className="flex items-center gap-2.5">
-      <svg
-        className="h-4 w-4 text-black/40"
-        fill="none"
-        viewBox="0 0 24 24"
-        strokeWidth={2}
-        stroke="currentColor"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M4.5 12.75l6 6 9-13.5"
-        />
-      </svg>
-      {children}
-    </li>
   );
 }

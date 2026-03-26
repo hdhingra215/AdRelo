@@ -4,6 +4,7 @@
 
 :root {
   --foreground: #1a1a1a;
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 body {
@@ -11,6 +12,16 @@ body {
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth scroll for anchor navigation */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Subtle selection highlight */
+::selection {
+  background: rgba(124, 58, 237, 0.12);
 }
 
 @layer utilities {
@@ -21,13 +32,13 @@ body {
 
 @layer components {
   .fade-in {
-    animation: fadeIn 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeIn 600ms var(--ease-out-expo) both;
   }
   .fade-in-up {
-    animation: fadeInUp 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 700ms var(--ease-out-expo) both;
   }
   .stagger > * {
-    animation: fadeInUp 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation: fadeInUp 500ms var(--ease-out-expo) both;
   }
   .stagger > *:nth-child(1) { animation-delay: 0ms; }
   .stagger > *:nth-child(2) { animation-delay: 80ms; }
