@@ -26,6 +26,12 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  const { data: settings } = await supabase
+    .from("agency_settings")
+    .select("firm_name, gst_number, bank_account, ifsc, branch, upi_id")
+    .eq("user_id", user.id)
+    .single();
+
   const clientName =
     order.clients &&
     typeof order.clients === "object" &&
@@ -33,7 +39,7 @@ export async function GET(
       ? (order.clients as { name: string }).name
       : "—";
 
-  const pdf = await generatePDF(order, clientName);
+  const pdf = await generatePDF(order, clientName, settings);
 
   return new NextResponse(new Uint8Array(pdf), {
     headers: {
@@ -47,10 +53,22 @@ function fmt(value: number | string): string {
   return Number(value).toFixed(2);
 }
 
+interface AgencySettings {
+  firm_name: string;
+  gst_number: string;
+  bank_account: string;
+  ifsc: string;
+  branch: string;
+  upi_id: string;
+}
+
 function generatePDF(
   order: Record<string, unknown>,
-  clientName: string
+  clientName: string,
+  settings: AgencySettings | null
 ): Promise<Buffer> {
+  const firmName = settings?.firm_name || "Sai Kripa Publicity";
+
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: "A4",
@@ -63,8 +81,10 @@ function generatePDF(
     doc.on("error", reject);
 
     // Title
+    doc.fontSize(20).text(firmName, { align: "center" });
+    doc.moveDown(0.3);
     doc
-      .fontSize(22)
+      .fontSize(14)
       .text("Release Order", { align: "center" });
 
     doc.moveDown(0.5);
@@ -148,6 +168,21 @@ function generatePDF(
       doc
         .fontSize(10)
         .text(String(order.special_comment), { width: 495 });
+    }
+
+    // Agency & Bank Details
+    if (settings) {
+      doc.moveDown(1.5);
+      sectionTitle("Agency Details");
+      row("Firm Name", settings.firm_name || "—");
+      row("GST Number", settings.gst_number || "—");
+      doc.moveDown(0.5);
+
+      sectionTitle("Bank Details");
+      row("Account Number", settings.bank_account || "—");
+      row("IFSC Code", settings.ifsc || "—");
+      row("Branch", settings.branch || "—");
+      row("UPI ID", settings.upi_id || "—");
     }
 
     doc.end();
