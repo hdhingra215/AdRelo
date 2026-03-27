@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
@@ -10,22 +11,36 @@ const razorpay = new Razorpay({
 
 export async function POST() {
   try {
+    // Require authenticated user
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
 
     console.log("Creating Razorpay order...");
     const order = await razorpay.orders.create({
       amount: 99900,
       currency: "INR",
+      notes: {
+        user_id: user.id,
+      },
     });
 
     return NextResponse.json({
       orderId: order.id,
       amount: order.amount,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("RAZORPAY ERROR:", error);
-    return Response.json(
-      { error: error?.message || "Failed to create order" },
-      { status: 500 }
-    );
+    const message =
+      error instanceof Error ? error.message : "Failed to create order";
+    return Response.json({ error: message }, { status: 500 });
   }
 }

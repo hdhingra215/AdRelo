@@ -34,6 +34,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
+  const next = searchParams.get("next");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -77,7 +78,7 @@ function LoginForm() {
           await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-              redirectTo: `${location.origin}/auth/callback`,
+              redirectTo: `${location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ""}`,
             },
           });
         }}
@@ -97,6 +98,7 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {next && <input type="hidden" name="next" value={next} />}
         <div>
           <label
             htmlFor="email"

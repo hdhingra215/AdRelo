@@ -142,7 +142,7 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Usage bar (free users) ── */}
+      {/* ── Usage bar (trial users) ── */}
       {usage.roLimit !== null && (
         <section className="fade-in-up mx-auto max-w-5xl px-6 pb-4" style={{ animationDelay: "80ms" }}>
           <div className="rounded-2xl bg-white/70 backdrop-blur-xl border border-black/[0.04] px-5 py-4 flex items-center justify-between gap-4">
@@ -173,11 +173,13 @@ export default async function DashboardPage() {
                 Resets on 1st of next month
               </p>
             </div>
-            {usage.roThisMonth >= usage.roLimit * 0.8 && (
-              <SoftButton href="/upgrade" size="sm">
-                Upgrade
-              </SoftButton>
-            )}
+            <SoftButton
+              href="/upgrade"
+              size="sm"
+              variant={usage.roThisMonth >= usage.roLimit * 0.8 ? "primary" : "secondary"}
+            >
+              Upgrade to Pro
+            </SoftButton>
           </div>
         </section>
       )}

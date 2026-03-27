@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SoftButton } from "@/components/ui/soft-button";
-import { upgradePlan } from "./actions";
+import { createClient } from "@/lib/supabase/client";
 
 function CheckIcon() {
   return (
@@ -98,17 +98,82 @@ function UpgradeContent() {
     setLoading(true);
     setError(null);
 
-    const result = await upgradePlan("pro");
+    try {
+      // 0. Require login
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    if (result.error) {
-      setError(result.error);
+      if (!user) {
+        router.push("/login?next=/upgrade");
+        return;
+      }
+
+      // 1. Create Razorpay order (server verifies auth + attaches user_id)
+      const res = await fetch("/api/create-order", { method: "POST" });
+      const data = await res.json();
+
+      if (res.status === 401) {
+        router.push("/login?next=/upgrade");
+        return;
+      }
+
+      if (!res.ok || !data.orderId) {
+        setError(data.error || "Failed to create order");
+        setLoading(false);
+        return;
+      }
+
+      const { orderId, amount } = data;
+
+      // 2. Load Razorpay script if needed
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const w = window as unknown as Record<string, any>;
+      if (!w.Razorpay) {
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+      }
+
+      // 3. Open checkout
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount,
+        currency: "INR",
+        name: "AdRelo",
+        description: "Pro Plan Upgrade",
+        order_id: orderId,
+        prefill: {
+          email: user.email,
+        },
+        handler: async function (response: Record<string, string>) {
+          const verifyRes = await fetch("/api/verify-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(response),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            setSuccess(true);
+            setTimeout(() => router.push("/dashboard"), 1500);
+          } else {
+            setError(verifyData.error || "Payment verification failed");
+          }
+        },
+      };
+
+      const rzp = new w.Razorpay(options);
+      rzp.open();
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setSuccess(true);
-    setLoading(false);
-    setTimeout(() => router.push("/dashboard"), 1500);
   }
 
   return (

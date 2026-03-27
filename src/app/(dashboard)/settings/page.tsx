@@ -7,6 +7,8 @@ import { SoftButton } from "@/components/ui/soft-button";
 import { SoftCard } from "@/components/ui/soft-card";
 import { SoftInput } from "@/components/ui/soft-input";
 import { saveSettings } from "./actions";
+import { getPlan, type PlanDef } from "@/lib/plans";
+import { getUserUsage, type UsageInfo } from "@/lib/usage";
 
 export default function SettingsPage() {
   const [form, setForm] = useState({
@@ -22,6 +24,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [plan, setPlan] = useState<PlanDef>(getPlan("trial"));
+  const [usage, setUsage] = useState<UsageInfo | null>(null);
 
   const loadSettings = useCallback(async () => {
     const supabase = createClient();
@@ -31,23 +35,28 @@ export default function SettingsPage() {
 
     if (!user) return;
 
-    const { data } = await supabase
-      .from("agency_settings")
-      .select("firm_name, gst_number, bank_account, ifsc, branch, upi_id")
-      .eq("user_id", user.id)
-      .single();
+    const [settingsResult, usageData] = await Promise.all([
+      supabase
+        .from("agency_settings")
+        .select("firm_name, gst_number, bank_account, ifsc, branch, upi_id, plan")
+        .eq("user_id", user.id)
+        .single(),
+      getUserUsage(supabase, user.id),
+    ]);
 
-    if (data) {
+    if (settingsResult.data) {
       setForm({
-        firm_name: data.firm_name ?? "",
-        gst_number: data.gst_number ?? "",
-        bank_account: data.bank_account ?? "",
-        ifsc: data.ifsc ?? "",
-        branch: data.branch ?? "",
-        upi_id: data.upi_id ?? "",
+        firm_name: settingsResult.data.firm_name ?? "",
+        gst_number: settingsResult.data.gst_number ?? "",
+        bank_account: settingsResult.data.bank_account ?? "",
+        ifsc: settingsResult.data.ifsc ?? "",
+        branch: settingsResult.data.branch ?? "",
+        upi_id: settingsResult.data.upi_id ?? "",
       });
+      setPlan(getPlan(settingsResult.data.plan));
     }
 
+    setUsage(usageData);
     setLoaded(true);
   }, []);
 
@@ -127,6 +136,79 @@ export default function SettingsPage() {
                 {success}
               </div>
             )}
+
+            {/* Your Plan */}
+            <div className="mb-6">
+              <SoftCard title="Your Plan">
+                {plan.id === "trial" && (
+                  <div className="space-y-3">
+                    <p className="text-sm text-foreground">
+                      You are currently on the <span className="font-semibold">Trial</span> plan
+                    </p>
+                    {usage && (
+                      <>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <p className="text-xs font-medium text-foreground/70">
+                              {usage.roThisMonth} / {usage.roLimit} Release Orders used this month
+                            </p>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-black/[0.04] overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-500 ${
+                                usage.roLimit && usage.roThisMonth >= usage.roLimit
+                                  ? "bg-red-400"
+                                  : usage.roLimit && usage.roThisMonth >= usage.roLimit * 0.8
+                                    ? "bg-amber-400"
+                                    : "bg-violet-400"
+                              }`}
+                              style={{
+                                width: `${usage.roLimit ? Math.min((usage.roThisMonth / usage.roLimit) * 100, 100) : 0}%`,
+                              }}
+                            />
+                          </div>
+                          <p className="mt-1.5 text-[11px] text-muted/60">
+                            Resets on 1st of next month
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    <div>
+                      <SoftButton href="/upgrade" size="sm">
+                        Upgrade to Pro
+                      </SoftButton>
+                    </div>
+                  </div>
+                )}
+                {plan.id === "pro" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-foreground">
+                        You are on the <span className="font-semibold">Pro</span> plan
+                      </p>
+                      <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-semibold text-violet-700">
+                        Pro
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted">Unlimited Release Orders</p>
+                    <p className="text-xs text-muted/60">Manage subscription (coming soon)</p>
+                  </div>
+                )}
+                {plan.id === "business" && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm text-foreground">
+                        You are on the <span className="font-semibold">Business</span> plan
+                      </p>
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                        Business
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted">Unlimited Release Orders</p>
+                  </div>
+                )}
+              </SoftCard>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6 stagger">
               <SoftCard title="Firm Details">
