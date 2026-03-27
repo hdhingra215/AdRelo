@@ -34,24 +34,10 @@ function CheckIcon() {
 
 const plans = [
   {
-    name: "Free",
-    price: "0",
-    period: "forever",
-    description: "Perfect for getting started with AdRelo.",
-    features: [
-      "10 release orders / month",
-      "Basic PDF generation",
-      "Client management",
-      "Email support",
-    ],
-    cta: "Get Started Free",
-    href: "/signup",
-    highlighted: false,
-  },
-  {
     name: "Pro",
     price: "999",
     period: "/ month",
+    yearlyPrice: "799",
     description: "For agencies that mean business.",
     features: [
       "Unlimited release orders",
@@ -68,8 +54,9 @@ const plans = [
   },
   {
     name: "Business",
-    price: "2,499",
+    price: "2,999",
     period: "/ month",
+    yearlyPrice: "2,499",
     description: "Scale your agency with your team.",
     features: [
       "Everything in Pro",
@@ -87,12 +74,13 @@ const plans = [
 
 export function PricingSection() {
   const { ref, visible } = useInView(0.1);
+  const [yearly, setYearly] = useState(false);
 
   return (
     <section ref={ref} className="mx-auto max-w-5xl px-6 pt-32 pb-32">
       {/* Header */}
       <div
-        className={`text-center mb-16 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        className={`text-center mb-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
         }`}
         style={{ willChange: "transform, opacity" }}
@@ -109,8 +97,51 @@ export function PricingSection() {
         </p>
       </div>
 
+      {/* Free trial message */}
+      <div
+        className={`text-center mb-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        }`}
+        style={{ transitionDelay: "120ms", willChange: "transform, opacity" }}
+      >
+        <p className="inline-flex items-center gap-2 rounded-xl bg-emerald-50/80 backdrop-blur border border-emerald-200/40 px-5 py-2.5 text-sm text-emerald-800 font-medium">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Start free — create up to 10 Release Orders per month. No card required.
+        </p>
+        <p className="mt-2 text-xs text-muted">No credit card required</p>
+      </div>
+
+      {/* Billing toggle */}
+      <div
+        className={`flex items-center justify-center gap-3 mb-12 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+          visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+        }`}
+        style={{ transitionDelay: "160ms", willChange: "transform, opacity" }}
+      >
+        <span className={`text-sm font-medium ${!yearly ? "text-foreground" : "text-muted"}`}>Monthly</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={yearly}
+          onClick={() => setYearly(!yearly)}
+          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ${
+            yearly ? "bg-emerald-500" : "bg-black/10"
+          }`}
+        >
+          <span
+            className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+              yearly ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </button>
+        <span className={`text-sm font-medium ${yearly ? "text-foreground" : "text-muted"}`}>
+          Yearly
+          <span className="ml-1.5 text-[11px] text-emerald-600 font-semibold">Save 20%</span>
+        </span>
+      </div>
+
       {/* Cards */}
-      <div className="grid gap-5 sm:grid-cols-3 items-start max-w-4xl mx-auto">
+      <div className="grid gap-5 sm:grid-cols-2 items-start max-w-3xl mx-auto">
         {plans.map((plan, i) => (
           <div
             key={plan.name}
@@ -147,9 +178,12 @@ export function PricingSection() {
               <div className="mt-3 flex items-baseline gap-1">
                 <span className="text-[11px] text-muted">&#8377;</span>
                 <span className={`font-bold text-foreground ${plan.highlighted ? "text-4xl" : "text-3xl"}`}>
-                  {plan.price}
+                  {yearly && plan.yearlyPrice ? plan.yearlyPrice : plan.price}
                 </span>
                 <span className="text-sm text-muted">{plan.period}</span>
+                {yearly && plan.yearlyPrice && (
+                  <span className="text-xs text-emerald-600 font-medium ml-1">Billed annually</span>
+                )}
               </div>
 
               <p className="mt-2.5 text-[13px] text-muted leading-relaxed">
