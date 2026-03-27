@@ -235,7 +235,7 @@ export default function NewReleaseOrderPage() {
             <p className="text-sm text-red-600">{error}</p>
             {limitReached && (
               <div className="mt-3 flex items-center gap-3">
-                <SoftButton href="/upgrade" size="sm">
+                <SoftButton href="/upgrade?source=limit" size="sm">
                   Upgrade to Pro
                 </SoftButton>
                 <span className="text-xs text-muted">Resets on 1st of next month</span>
