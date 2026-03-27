@@ -91,10 +91,12 @@ function UpgradeContent() {
   const fromLimit = searchParams.get("source") === "limit";
 
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   async function handleUpgrade() {
+    if (loading || verifying || success) return;
     setLoading(true);
     setError(null);
 
@@ -152,15 +154,17 @@ function UpgradeContent() {
           email: user.email,
         },
         handler: async function (response: Record<string, string>) {
+          setLoading(false);
+          setVerifying(true);
           const verifyRes = await fetch("/api/verify-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(response),
           });
           const verifyData = await verifyRes.json();
+          setVerifying(false);
           if (verifyData.success) {
             setSuccess(true);
-            setTimeout(() => router.push("/dashboard"), 1500);
           } else {
             setError(verifyData.error || "Payment verification failed");
           }
@@ -168,12 +172,63 @@ function UpgradeContent() {
       };
 
       const rzp = new w.Razorpay(options);
+      rzp.on("payment.failed", () => {
+        setLoading(false);
+        setError("Payment failed. Please try again.");
+      });
       rzp.open();
     } catch {
       setError("Something went wrong. Please try again.");
-    } finally {
       setLoading(false);
     }
+  }
+
+  // ── Success screen ──
+  if (success) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="mx-auto max-w-md px-6 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 border border-emerald-200/60">
+            <svg className="h-8 w-8 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            You&apos;re now on Pro plan
+          </h1>
+          <p className="mt-3 text-base text-muted leading-relaxed">
+            Unlimited Release Orders unlocked
+          </p>
+          <div className="mt-8">
+            <SoftButton href="/dashboard" size="lg">
+              Go to Dashboard
+            </SoftButton>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Verifying screen ──
+  if (verifying) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="mx-auto max-w-md px-6 text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-black/[0.03]">
+            <svg className="h-6 w-6 animate-spin text-foreground/50" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+            Verifying payment...
+          </h1>
+          <p className="mt-2 text-sm text-muted">
+            Please wait while we confirm your upgrade.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -273,12 +328,6 @@ function UpgradeContent() {
                   >
                     Coming Soon
                   </button>
-                ) : success ? (
-                  <div className="rounded-xl bg-emerald-50 border border-emerald-200/60 p-3.5 text-center">
-                    <p className="text-sm font-medium text-emerald-700">
-                      Upgraded to Pro! Redirecting...
-                    </p>
-                  </div>
                 ) : (
                   <>
                     <SoftButton
@@ -287,7 +336,7 @@ function UpgradeContent() {
                       fullWidth
                       size="lg"
                     >
-                      {loading ? "Upgrading..." : "Upgrade to Pro"}
+                      {loading ? "Processing..." : "Upgrade to Pro"}
                     </SoftButton>
                     {error && (
                       <p className="mt-3 text-sm text-red-600 text-center">
