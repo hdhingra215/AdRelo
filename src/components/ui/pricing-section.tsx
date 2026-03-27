@@ -1,4 +1,5 @@
 "use client";
+// © 2026 Himanshu Dhingra. All rights reserved.
 
 import { useEffect, useRef, useState } from "react";
 import { SoftButton } from "@/components/ui/soft-button";

@@ -1,4 +1,5 @@
 "use client";
+// © 2026 Himanshu Dhingra. All rights reserved.
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";

@@ -1,3 +1,4 @@
+// © 2026 Himanshu Dhingra. All rights reserved.
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";

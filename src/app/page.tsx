@@ -1,3 +1,4 @@
+// © 2026 Himanshu Dhingra. All rights reserved.
 import { SoftButton } from "@/components/ui/soft-button";
 import { MarqueeCards } from "@/components/ui/marquee-cards";
 import { HowItWorks } from "@/components/ui/how-it-works";

@@ -1,3 +1,4 @@
+// © 2026 Himanshu Dhingra. All rights reserved.
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";

@@ -1,3 +1,4 @@
+// © 2026 Himanshu Dhingra. All rights reserved.
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { createClient } from "@/lib/supabase/server";
@@ -24,7 +25,6 @@ export async function POST() {
       );
     }
 
-    console.log("Creating Razorpay order...");
     const order = await razorpay.orders.create({
       amount: 99900,
       currency: "INR",

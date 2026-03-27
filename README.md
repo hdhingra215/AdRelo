@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AdRelo — The Agency Engine
+
+Run your advertising agency like a machine.
+
+## Overview
+
+AdRelo is a modern SaaS platform designed for advertising agencies to manage release orders, clients, billing, and GST workflows in one clean system.
+
+## Features
+
+- **Release Order Management** — Create, track, and manage ROs with auto-calculated pricing
+- **Client Management** — Maintain a searchable client directory
+- **Invoice & Billing System** — Generate bills linked to release orders
+- **PDF Generation** — Professional, branded PDF exports for ROs and invoices
+- **GST Calculation** — Automatic GST computation with reports
+- **Trial to Pro Upgrade** — Built-in upgrade flow with Razorpay payment integration
+- **Google & Email Auth** — Supabase-powered authentication
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Database & Auth:** Supabase
+- **Payments:** Razorpay
+- **Styling:** Tailwind CSS
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Clone the repository
+git clone <repo-url>
+cd AdRelo
+
+# Install dependencies
+npm install
+
+# Add environment variables
+cp .env.local.example .env.local
+# Fill in the values below
+
+# Run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Description |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `NEXT_PUBLIC_RAZORPAY_KEY_ID` | Razorpay key ID (public) |
+| `RAZORPAY_KEY_SECRET` | Razorpay key secret (server-only) |
 
-## Learn More
+## Pricing
 
-To learn more about Next.js, take a look at the following resources:
+| Plan | Limit | Price |
+|---|---|---|
+| Trial | 10 Release Orders / month | Free |
+| Pro | Unlimited | Rs. 999/month |
+| Business | Unlimited + team features | Coming soon |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+See [LICENSE](./LICENSE) file.
 
-## Deploy on Vercel
+## Author
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Himanshu Dhingra
