@@ -8,7 +8,9 @@
       "Bash(npm run:*)",
       "Bash(ls:*)",
       "Bash(find /Users/saikripa/Desktop/AdRelo/supabase -type f -name *.sql)",
-      "Bash(find /Users/saikripa/Desktop/AdRelo/src -type f -name *pdf* -o -path */pdf/*)"
+      "Bash(find /Users/saikripa/Desktop/AdRelo/src -type f -name *pdf* -o -path */pdf/*)",
+      "Bash(npm list:*)",
+      "Bash(/dev/null --prefix /Users/saikripa/Desktop/AdRelo)"
     ]
   }
 }

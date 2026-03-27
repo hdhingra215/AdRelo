@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { ensureTrialPlan } from "@/lib/ensure-trial";
 
 export async function signup(formData: FormData) {
   const supabase = createClient();
@@ -35,13 +36,17 @@ export async function login(formData: FormData) {
     return { error: "Email and password are required." };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
     return { error: error.message };
+  }
+
+  if (data.user) {
+    await ensureTrialPlan(supabase, data.user.id);
   }
 
   redirect("/dashboard");

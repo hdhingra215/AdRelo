@@ -130,7 +130,7 @@ function UpgradeContent() {
       <section className="mx-auto max-w-2xl px-6 pt-16 pb-12 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-[1.15]">
           {fromLimit
-            ? "You\u2019ve reached your free trial limit"
+            ? "You\u2019ve reached your trial limit"
             : "Unlock unlimited Release Orders"}
         </h1>
         <p className="mt-4 text-base text-muted leading-relaxed max-w-md mx-auto">

@@ -44,7 +44,7 @@ export async function getUserUsage(
       .lt("created_at", end),
   ]);
 
-  const planId = settingsResult.data?.plan ?? "free";
+  const planId = settingsResult.data?.plan ?? "trial";
   const plan = getPlan(planId);
   const roThisMonth = roCountResult.count ?? 0;
   const canCreateRO = plan.roLimit === null || roThisMonth < plan.roLimit;

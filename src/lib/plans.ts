@@ -1,6 +1,6 @@
 /** Plan definitions — single source of truth for limits & metadata. */
 
-export type PlanId = "free" | "pro" | "business";
+export type PlanId = "trial" | "pro" | "business";
 
 export interface PlanDef {
   id: PlanId;
@@ -10,12 +10,12 @@ export interface PlanDef {
 }
 
 export const PLANS: Record<PlanId, PlanDef> = {
-  free: { id: "free", name: "Free", roLimit: 10, price: 0 },
+  trial: { id: "trial", name: "Trial", roLimit: 10, price: 0 },
   pro: { id: "pro", name: "Pro", roLimit: null, price: 999 },
-  business: { id: "business", name: "Business", roLimit: null, price: 2499 },
+  business: { id: "business", name: "Business", roLimit: null, price: 2999 },
 };
 
 export function getPlan(id: string | null | undefined): PlanDef {
   if (id && id in PLANS) return PLANS[id as PlanId];
-  return PLANS.free;
+  return PLANS.trial;
 }

@@ -234,11 +234,15 @@ export default function NewReleaseOrderPage() {
           <div className="mb-6 rounded-xl bg-white/80 px-5 py-4 shadow-soft fade-in">
             <p className="text-sm text-red-600">{error}</p>
             {limitReached && (
-              <div className="mt-3 flex items-center gap-3">
-                <SoftButton href="/upgrade?source=limit" size="sm">
-                  Upgrade to Pro
-                </SoftButton>
-                <span className="text-xs text-muted">Resets on 1st of next month</span>
+              <div className="mt-3">
+                <div className="flex items-center gap-3">
+                  <SoftButton href="/upgrade?source=limit" size="sm">
+                    Upgrade to Pro
+                  </SoftButton>
+                </div>
+                <p className="mt-2 text-xs text-muted">
+                  You&apos;ve used all 10 trial Release Orders. Resets on 1st of next month.
+                </p>
               </div>
             )}
           </div>

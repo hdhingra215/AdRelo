@@ -82,7 +82,7 @@ export default async function DashboardPage() {
             </span>
           ) : (
             <span className="rounded-full bg-black/[0.05] px-2 py-0.5 text-[10px] font-semibold text-muted">
-              Free
+              Trial
             </span>
           )}
         </div>

@@ -37,7 +37,7 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
   const usage = await getUserUsage(supabase, user.id);
   if (!usage.canCreateRO) {
     return {
-      error: `You've reached your free trial limit. Upgrade to Pro to continue creating Release Orders.`,
+      error: `Your trial limit is over. Upgrade to Pro to continue creating Release Orders.`,
       limitReached: true,
     };
   }
