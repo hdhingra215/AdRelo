@@ -9,6 +9,7 @@ interface SettingsInput {
   ifsc: string;
   branch: string;
   upi_id: string;
+  payment_instructions: string;
 }
 
 export async function saveSettings(input: SettingsInput) {
@@ -40,6 +41,7 @@ export async function saveSettings(input: SettingsInput) {
         ifsc: input.ifsc.trim(),
         branch: input.branch.trim(),
         upi_id: input.upi_id.trim(),
+        payment_instructions: input.payment_instructions.trim(),
         updated_at: new Date().toISOString(),
       })
       .eq("user_id", user.id);
@@ -57,6 +59,7 @@ export async function saveSettings(input: SettingsInput) {
       ifsc: input.ifsc.trim(),
       branch: input.branch.trim(),
       upi_id: input.upi_id.trim(),
+      payment_instructions: input.payment_instructions.trim(),
     });
 
     if (error) {

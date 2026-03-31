@@ -375,12 +375,12 @@ export default async function DashboardPage() {
                         <td className="whitespace-nowrap px-6 py-[18px] text-right">
                           <div className="flex items-center justify-end gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
                             <Link
-                              href={`/release-orders/${ro.id}/pdf`}
+                              href={`/release-orders/${ro.id}/print`}
                               target="_blank"
                               className="text-xs font-medium text-muted hover:text-foreground transition-colors"
-                              title="Download PDF"
+                              title="Print"
                             >
-                              PDF
+                              Print
                             </Link>
                             {!billed && (
                               <Link

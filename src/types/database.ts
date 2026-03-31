@@ -151,6 +151,8 @@ export type Database = {
           ifsc: string;
           branch: string;
           upi_id: string;
+          payment_instructions: string;
+          qr_code_url: string | null;
           plan: string;
           created_at: string;
           updated_at: string;
@@ -164,6 +166,8 @@ export type Database = {
           ifsc?: string;
           branch?: string;
           upi_id?: string;
+          payment_instructions?: string;
+          qr_code_url?: string | null;
           plan?: string;
           created_at?: string;
           updated_at?: string;
@@ -177,6 +181,8 @@ export type Database = {
           ifsc?: string;
           branch?: string;
           upi_id?: string;
+          payment_instructions?: string;
+          qr_code_url?: string | null;
           plan?: string;
           updated_at?: string;
         };

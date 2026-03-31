@@ -10,7 +10,12 @@
       "Bash(find /Users/saikripa/Desktop/AdRelo/supabase -type f -name *.sql)",
       "Bash(find /Users/saikripa/Desktop/AdRelo/src -type f -name *pdf* -o -path */pdf/*)",
       "Bash(npm list:*)",
-      "Bash(/dev/null --prefix /Users/saikripa/Desktop/AdRelo)"
+      "Bash(/dev/null --prefix /Users/saikripa/Desktop/AdRelo)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(echo \"EXIT_CODE:$?\")",
+      "Bash(pkill -f \"next build\")",
+      "Bash(pkill -f tsc)",
+      "Bash(node:*)"
     ]
   }
 }

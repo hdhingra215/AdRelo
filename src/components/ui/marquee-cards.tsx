@@ -101,8 +101,8 @@ function MarqueeRow({
   items: { icon: string; label: string }[];
   direction: "left" | "right";
 }) {
-  // Duplicate items 6x for wide seamless coverage
-  const duplicated = [...items, ...items, ...items, ...items, ...items, ...items];
+  // Duplicate items 3x for seamless coverage
+  const duplicated = [...items, ...items, ...items];
 
   return (
     <div className="overflow-hidden">

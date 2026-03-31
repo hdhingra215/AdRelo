@@ -17,10 +17,11 @@ export async function GET(request: Request) {
       if (user) {
         await ensureTrialPlan(supabase, user.id);
       }
-      return NextResponse.redirect(`${origin}${next}`);
+      // Redirect through a loading page to avoid blank screen
+      const safePath = next.startsWith("/") ? next : "/dashboard";
+      return NextResponse.redirect(`${origin}${safePath}`);
     }
   }
 
-  // Return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/login?error=auth`);
 }

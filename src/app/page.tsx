@@ -1,8 +1,21 @@
 // © 2026 Himanshu Dhingra. All rights reserved.
+import dynamic from "next/dynamic";
 import { SoftButton } from "@/components/ui/soft-button";
-import { MarqueeCards } from "@/components/ui/marquee-cards";
-import { HowItWorks } from "@/components/ui/how-it-works";
-import { PricingSection } from "@/components/ui/pricing-section";
+
+const MarqueeCards = dynamic(
+  () => import("@/components/ui/marquee-cards").then((m) => m.MarqueeCards),
+  { ssr: false, loading: () => <div className="h-[280px]" /> }
+);
+
+const HowItWorks = dynamic(
+  () => import("@/components/ui/how-it-works").then((m) => m.HowItWorks),
+  { ssr: false, loading: () => <div className="h-[400px]" /> }
+);
+
+const PricingSection = dynamic(
+  () => import("@/components/ui/pricing-section").then((m) => m.PricingSection),
+  { ssr: false, loading: () => <div className="h-[400px]" /> }
+);
 
 export default function Home() {
   return (

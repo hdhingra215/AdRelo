@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -34,7 +34,6 @@ function numberToWords(num: number): string {
   const intPart = Math.floor(Math.abs(num));
   const decimal = Math.round((Math.abs(num) - intPart) * 100);
 
-  // Indian numbering: crore, lakh, thousand, hundred
   const parts: string[] = [];
 
   const crore = Math.floor(intPart / 10000000);
@@ -71,15 +70,18 @@ function todayISO(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+const GST_RATE = 0.05;
+
 interface ROData {
   id: string;
   ro_number: string;
   client_id: string;
-  rate: number;
-  discount: number;
-  net_amount: number;
-  gst: number;
-  total_amount: number;
+  publication: string;
+  edition: string;
+  advertisement_category: string;
+  size: string;
+  caption: string;
+  publishing_date: string;
   bill_generated: boolean;
   clients: { name: string } | null;
 }
@@ -95,7 +97,28 @@ function BillForm() {
 
   const [billNumber] = useState(generateBillNumber);
   const [date] = useState(todayISO);
+
+  // User-editable billing fields
+  const [amount, setAmount] = useState("");
+  const [discount, setDiscount] = useState("");
   const [amountInWords, setAmountInWords] = useState("");
+
+  // Auto-calculate net, gst, total from amount & discount
+  const calculated = useMemo(() => {
+    const amt = Number(amount) || 0;
+    const disc = Number(discount) || 0;
+    const net_amount = Math.max(amt - disc, 0);
+    const gst = parseFloat((net_amount * GST_RATE).toFixed(2));
+    const total_amount = parseFloat((net_amount + gst).toFixed(2));
+    return { net_amount, gst, total_amount };
+  }, [amount, discount]);
+
+  // Update amount in words when total changes
+  useEffect(() => {
+    if (calculated.total_amount > 0) {
+      setAmountInWords(numberToWords(calculated.total_amount));
+    }
+  }, [calculated.total_amount]);
 
   const fetchRO = useCallback(async () => {
     if (!roId) {
@@ -106,7 +129,7 @@ function BillForm() {
     const supabase = createClient();
     const { data, error: err } = await supabase
       .from("release_orders")
-      .select("id, ro_number, client_id, rate, discount, net_amount, gst, total_amount, bill_generated, clients(name)")
+      .select("id, ro_number, client_id, publication, edition, advertisement_category, size, caption, publishing_date, bill_generated, clients(name)")
       .eq("id", roId)
       .single();
 
@@ -129,7 +152,6 @@ function BillForm() {
     };
 
     setRO(roData);
-    setAmountInWords(numberToWords(Number(data.total_amount)));
   }, [roId]);
 
   useEffect(() => {
@@ -142,17 +164,26 @@ function BillForm() {
     setError("");
     setLoading(true);
 
+    const amt = Number(amount) || 0;
+    const disc = Number(discount) || 0;
+
+    if (amt <= 0) {
+      setError("Please enter a valid amount.");
+      setLoading(false);
+      return;
+    }
+
     try {
       const result = await createBill({
         bill_number: billNumber,
         date,
         release_order_id: ro.id,
         client_id: ro.client_id,
-        amount: Number(ro.rate),
-        discount: Number(ro.discount),
-        net_amount: Number(ro.net_amount),
-        gst: Number(ro.gst),
-        total_amount: Number(ro.total_amount),
+        amount: amt,
+        discount: disc,
+        net_amount: calculated.net_amount,
+        gst: calculated.gst,
+        total_amount: calculated.total_amount,
         amount_in_words: amountInWords,
       });
 
@@ -235,42 +266,84 @@ function BillForm() {
                 </div>
               </SoftCard>
 
-              {/* Source RO */}
-              <SoftCard title="Release Order">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">RO Number</span>
-                  <span className="text-sm font-medium text-foreground">{ro.ro_number}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Client</span>
-                  <span className="text-sm font-medium text-foreground">{clientName}</span>
+              {/* Client & RO Details (auto-filled) */}
+              <SoftCard title="Client & Advertisement Details">
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">Client</span>
+                    <span className="text-sm font-medium text-foreground">{clientName}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">RO Number</span>
+                    <span className="text-sm font-medium text-foreground">{ro.ro_number}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">Publication</span>
+                    <span className="text-sm text-foreground/70">{ro.publication}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">Edition</span>
+                    <span className="text-sm text-foreground/70">{ro.edition}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">Category</span>
+                    <span className="text-sm text-foreground/70">{ro.advertisement_category}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted">Size</span>
+                    <span className="text-sm text-foreground/70">{ro.size}</span>
+                  </div>
                 </div>
               </SoftCard>
 
-              {/* Amounts */}
+              {/* Billing Amounts (user enters) */}
               <SoftCard title="Billing Amounts">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Amount (Rate)</span>
-                  <span className="text-sm tabular-nums text-foreground/70">{Number(ro.rate).toFixed(2)}</span>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <SoftInput
+                    label="Amount"
+                    type="number"
+                    value={amount}
+                    onChange={setAmount}
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter amount"
+                    required
+                  />
+                  <SoftInput
+                    label="Discount"
+                    type="number"
+                    value={discount}
+                    onChange={setDiscount}
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter discount (if any)"
+                  />
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">Discount</span>
-                  <span className="text-sm tabular-nums text-foreground/70">{Number(ro.discount).toFixed(2)}</span>
-                </div>
-                <hr className="border-black/[0.04]" />
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-muted">Net Amount</span>
-                  <span className="text-sm tabular-nums font-semibold text-foreground">{Number(ro.net_amount).toFixed(2)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted">GST (5%)</span>
-                  <span className="text-sm tabular-nums text-foreground/70">{Number(ro.gst).toFixed(2)}</span>
-                </div>
-                <hr className="border-black/[0.04]" />
-                <div className="flex items-center justify-between py-1">
-                  <span className="text-sm font-medium text-muted">Total Amount</span>
-                  <span className="text-xl font-bold tabular-nums text-foreground">{Number(ro.total_amount).toFixed(2)}</span>
-                </div>
+
+                {/* Auto-calculated summary */}
+                {Number(amount) > 0 && (
+                  <div className="mt-5 rounded-xl bg-black/[0.02] border border-black/[0.04] p-5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted">Net Amount</span>
+                      <span className="text-sm tabular-nums font-semibold text-foreground">
+                        {calculated.net_amount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted">GST (5%)</span>
+                      <span className="text-sm tabular-nums text-foreground/70">
+                        {calculated.gst.toFixed(2)}
+                      </span>
+                    </div>
+                    <hr className="border-black/[0.04]" />
+                    <div className="flex items-center justify-between py-1">
+                      <span className="text-sm font-medium text-muted">Total Amount</span>
+                      <span className="text-xl font-bold tabular-nums text-foreground">
+                        {calculated.total_amount.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </SoftCard>
 
               {/* Amount in Words */}

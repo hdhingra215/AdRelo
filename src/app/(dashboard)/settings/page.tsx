@@ -18,7 +18,10 @@ export default function SettingsPage() {
     ifsc: "",
     branch: "",
     upi_id: "",
+    payment_instructions: "",
   });
+  const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null);
+  const [uploadingQr, setUploadingQr] = useState(false);
 
   const [loaded, setLoaded] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -38,7 +41,7 @@ export default function SettingsPage() {
     const [settingsResult, usageData] = await Promise.all([
       supabase
         .from("agency_settings")
-        .select("firm_name, gst_number, bank_account, ifsc, branch, upi_id, plan")
+        .select("firm_name, gst_number, bank_account, ifsc, branch, upi_id, payment_instructions, qr_code_url, plan")
         .eq("user_id", user.id)
         .single(),
       getUserUsage(supabase, user.id),
@@ -52,7 +55,9 @@ export default function SettingsPage() {
         ifsc: settingsResult.data.ifsc ?? "",
         branch: settingsResult.data.branch ?? "",
         upi_id: settingsResult.data.upi_id ?? "",
+        payment_instructions: settingsResult.data.payment_instructions ?? "",
       });
+      setQrCodeUrl(settingsResult.data.qr_code_url ?? null);
       setPlan(getPlan(settingsResult.data.plan));
     }
 
@@ -254,6 +259,112 @@ export default function SettingsPage() {
                     onChange={(v) => update("upi_id", v)}
                     placeholder="e.g. firm@upi"
                   />
+                </div>
+              </SoftCard>
+
+              <SoftCard title="Payment Instructions">
+                <div>
+                  <label className="mb-1.5 block text-xs font-medium text-muted">
+                    Payment Instructions
+                  </label>
+                  <textarea
+                    value={form.payment_instructions}
+                    onChange={(e) => update("payment_instructions", e.target.value)}
+                    rows={3}
+                    placeholder="e.g. Payment due within 30 days. Cheques payable to..."
+                    className="w-full rounded-lg border border-black/[0.06] bg-white/60 px-3.5 py-2.5 text-sm text-foreground placeholder:text-foreground/25 focus:bg-white focus:border-foreground/20 focus:outline-none focus:ring-1 focus:ring-foreground/10 transition-all duration-200 resize-none"
+                  />
+                </div>
+              </SoftCard>
+
+              <SoftCard title="QR Code">
+                <div className="space-y-3">
+                  <p className="text-xs text-muted">
+                    Upload a payment QR code to display on bills and invoices
+                  </p>
+                  {qrCodeUrl && (
+                    <div className="flex items-center gap-4">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={qrCodeUrl}
+                        alt="Payment QR Code"
+                        className="h-24 w-24 rounded-lg border border-black/[0.06] object-contain"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const supabase = createClient();
+                          await supabase
+                            .from("agency_settings")
+                            .update({ qr_code_url: null, updated_at: new Date().toISOString() })
+                            .eq("user_id", (await supabase.auth.getUser()).data.user!.id);
+                          setQrCodeUrl(null);
+                        }}
+                        className="text-xs text-red-500 hover:text-red-700 transition-colors"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-muted">
+                      {qrCodeUrl ? "Replace QR Code" : "Upload QR Code"}
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      disabled={uploadingQr}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        if (file.size > 2 * 1024 * 1024) {
+                          setError("QR code image must be under 2MB.");
+                          return;
+                        }
+                        setUploadingQr(true);
+                        setError("");
+                        try {
+                          const supabase = createClient();
+                          const { data: { user: u } } = await supabase.auth.getUser();
+                          if (!u) return;
+
+                          const ext = file.name.split(".").pop() || "png";
+                          const path = `${u.id}/qr-code.${ext}`;
+
+                          const { error: uploadError } = await supabase.storage
+                            .from("agency-assets")
+                            .upload(path, file, { upsert: true });
+
+                          if (uploadError) {
+                            setError("Upload failed: " + uploadError.message);
+                            return;
+                          }
+
+                          const { data: urlData } = supabase.storage
+                            .from("agency-assets")
+                            .getPublicUrl(path);
+
+                          const publicUrl = urlData.publicUrl + "?t=" + Date.now();
+
+                          await supabase
+                            .from("agency_settings")
+                            .update({ qr_code_url: publicUrl, updated_at: new Date().toISOString() })
+                            .eq("user_id", u.id);
+
+                          setQrCodeUrl(publicUrl);
+                        } catch {
+                          setError("Failed to upload QR code.");
+                        } finally {
+                          setUploadingQr(false);
+                          e.target.value = "";
+                        }
+                      }}
+                      className="w-full text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-black/[0.04] file:px-3 file:py-2 file:text-xs file:font-medium file:text-foreground hover:file:bg-black/[0.08] file:transition-colors file:cursor-pointer disabled:opacity-50"
+                    />
+                    {uploadingQr && (
+                      <p className="mt-1.5 text-xs text-muted">Uploading…</p>
+                    )}
+                  </div>
                 </div>
               </SoftCard>
 
