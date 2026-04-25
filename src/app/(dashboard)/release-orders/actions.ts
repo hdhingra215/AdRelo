@@ -74,6 +74,7 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
     .from("clients")
     .select("id")
     .eq("name", clientName)
+    .eq("user_id", user.id)
     .single();
 
   if (existingClient) {
@@ -81,7 +82,10 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
   } else {
     const { data: newClient, error: clientError } = await supabase
       .from("clients")
-      .insert({ name: clientName })
+      .insert({
+  name: clientName,
+  user_id: user.id,
+})
       .select("id")
       .single();
 
@@ -96,6 +100,7 @@ export async function createReleaseOrder(input: ReleaseOrderInput) {
     ro_number: input.ro_number.trim(),
     date: input.date,
     client_id: clientId,
+    user_id: user.id,
     publication: input.publication.trim(),
     edition: input.edition.trim(),
     advertisement_category: input.advertisement_category.trim(),

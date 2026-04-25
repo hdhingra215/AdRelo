@@ -24,6 +24,7 @@ export async function createClientAction(form: ClientForm) {
     phone: form.phone.trim(),
     gst_number: form.gst_number.trim(),
     address: form.address.trim(),
+    user_id: user.id,
   });
 
   if (error) {

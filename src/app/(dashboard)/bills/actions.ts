@@ -39,6 +39,7 @@ export async function createBill(input: BillInput) {
       date: input.date,
       release_order_id: input.release_order_id,
       client_id: input.client_id,
+      user_id: user.id,
       amount: input.amount,
       discount: input.discount,
       net_amount: input.net_amount,
@@ -58,6 +59,7 @@ export async function createBill(input: BillInput) {
     .from("release_orders")
     .update({ bill_generated: true })
     .eq("id", input.release_order_id);
+    .eq("user_id", user.id);
 
   if (updateError) {
     return { error: "Bill created but failed to update release order: " + updateError.message };
