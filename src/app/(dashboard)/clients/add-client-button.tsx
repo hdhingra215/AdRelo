@@ -23,7 +23,7 @@ export function AddClientButton() {
               <button onClick={() => setOpen(false)}>✕</button>
             </div>
 
-            <ClientForm onSuccess={() => setOpen(false)} />
+            <ClientForm onClose={() => setOpen(false)} />
           </div>
         </div>
       )}
