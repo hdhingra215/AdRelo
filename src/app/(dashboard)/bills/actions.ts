@@ -58,7 +58,7 @@ export async function createBill(input: BillInput) {
   const { error: updateError } = await supabase
     .from("release_orders")
     .update({ bill_generated: true })
-    .eq("id", input.release_order_id);
+    .eq("id", input.release_order_id)
     .eq("user_id", user.id);
 
   if (updateError) {
